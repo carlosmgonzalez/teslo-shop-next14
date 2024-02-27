@@ -10,11 +10,11 @@ export const Title = ({ className, subtitle, title }: Props) => {
   return (
     <div className={`mt-3 ${className}`}>
       <h1
-        className={`${titleFont.className} antialiased text-4x font-semibold my-6`}
+        className={`${titleFont.className} antialiased text-4xl font-semibold mt-6 mb-3`}
       >
         {title}
       </h1>
-      {subtitle && <h3 className="text-xl mb-10">{subtitle}</h3>}
+      {subtitle && <h3 className="text-xl mb-8">{subtitle}</h3>}
     </div>
   );
 };

@@ -1,6 +1,12 @@
-import { SeedData } from "@/interfaces";
+import { Product, ValidTypes } from "../interfaces";
+
+export interface SeedData {
+  categories: ValidTypes[];
+  products: Product[];
+}
 
 export const initialData: SeedData = {
+  categories: ["hats", "hoodies", "pants", "shirts"],
   products: [
     {
       description:

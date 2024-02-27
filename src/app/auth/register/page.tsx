@@ -1,12 +1,18 @@
 import { titleFont } from "@/config/fonts";
 import Link from "next/link";
 
-export default function AuthPage() {
+export default function RegisterPage() {
   return (
     <div className="flex flex-col min-h-screen pt-32 sm:pt-52">
-      <h1 className={`${titleFont.className} text-4xl mb-5`}>Ingresar</h1>
+      <h1 className={`${titleFont.className} text-4xl mb-5`}>Register</h1>
 
       <div className="flex flex-col">
+        <label htmlFor="name">Name</label>
+        <input
+          className="px-5 py-2 border bg-gray-200 rounded mb-5"
+          type="text"
+        />
+
         <label htmlFor="email">Email</label>
         <input
           className="px-5 py-2 border bg-gray-200 rounded mb-5"
@@ -19,7 +25,7 @@ export default function AuthPage() {
           type="email"
         />
 
-        <button className="btn-primary">Ingresar</button>
+        <button className="btn-primary">Register</button>
 
         {/* divisor l ine */}
         <div className="flex items-center my-5">
@@ -28,9 +34,9 @@ export default function AuthPage() {
           <div className="flex-1 border-t border-gray-500"></div>
         </div>
 
-        <span className="text-center">You don&apos;t have an account?</span>
-        <Link href="/auth/register" className="btn-secondary text-center">
-          Register
+        <span className="text-center">Do you already have an account?</span>
+        <Link href="/auth/login" className="btn-secondary text-center">
+          Login
         </Link>
       </div>
     </div>
