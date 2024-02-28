@@ -4,6 +4,7 @@ export * from "./ui/title";
 export * from "./ui/sidebar";
 export * from "./ui/button-menu";
 export * from "./ui/footer";
+export * from "./ui/pagination";
 export * from "./product/product-grid";
 export * from "./product/product-grid-item";
 export * from "./product/size-selector";

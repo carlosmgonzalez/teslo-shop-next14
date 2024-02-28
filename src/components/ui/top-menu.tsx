@@ -15,19 +15,19 @@ export const TopMenu = () => {
 
       <div className="hidden sm:flex">
         <Link
-          href="/category/men"
+          href="/gender/men"
           className="m-2 px-2 py-1 rounded-md transition-all hover:bg-gray-100"
         >
           Men
         </Link>
         <Link
-          href="/category/women"
+          href="/gender/women"
           className="m-2 px-2 py-1 rounded-md transition-all hover:bg-gray-100"
         >
           Women
         </Link>
         <Link
-          href="/category/kid"
+          href="/gender/kid"
           className="m-2 px-2 py-1 rounded-md transition-all hover:bg-gray-100"
         >
           Kids

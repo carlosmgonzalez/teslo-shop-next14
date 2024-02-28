@@ -1,4 +1,18 @@
 export interface Product {
+  id: string;
+  description: string;
+  images: string[];
+  inStock: number;
+  price: number;
+  sizes: Size[];
+  slug: string;
+  tags: string[];
+  title: string;
+  // type: ValidTypes;
+  gender: Category;
+}
+
+export interface ProductSeed {
   description: string;
   images: string[];
   inStock: number;

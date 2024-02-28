@@ -1,8 +1,8 @@
-import { Product, ValidTypes } from "../interfaces";
+import { Product, ProductSeed, ValidTypes } from "../interfaces";
 
 export interface SeedData {
   categories: ValidTypes[];
-  products: Product[];
+  products: ProductSeed[];
 }
 
 export const initialData: SeedData = {
