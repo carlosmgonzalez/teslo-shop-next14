@@ -1,11 +1,45 @@
 import { Product, ProductSeed, ValidTypes } from "../interfaces";
 
+interface SeedUser {
+  email: string;
+  password: string;
+  name: string;
+  role: "admin" | "user";
+}
+
 export interface SeedData {
+  users: SeedUser[];
   categories: ValidTypes[];
   products: ProductSeed[];
 }
 
 export const initialData: SeedData = {
+  users: [
+    {
+      email: "carlos@gmail.com",
+      name: "carlos",
+      password: "123456",
+      role: "admin",
+    },
+    {
+      email: "mario@gmail.com",
+      name: "mario",
+      password: "123456",
+      role: "admin",
+    },
+    {
+      email: "santiago@gmail.com",
+      name: "santiago",
+      password: "123456",
+      role: "admin",
+    },
+    {
+      email: "bretta@gmail.com",
+      name: "bretta",
+      password: "123456",
+      role: "admin",
+    },
+  ],
   categories: ["hats", "hoodies", "pants", "shirts"],
   products: [
     {
