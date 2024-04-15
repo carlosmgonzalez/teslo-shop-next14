@@ -1,4 +1,5 @@
 import { Product, ProductSeed, ValidTypes } from "../interfaces";
+import bcryptjs from "bcryptjs";
 
 interface SeedUser {
   email: string;
@@ -18,25 +19,25 @@ export const initialData: SeedData = {
     {
       email: "carlos@gmail.com",
       name: "carlos",
-      password: "123456",
+      password: bcryptjs.hashSync("123456"),
       role: "admin",
     },
     {
       email: "mario@gmail.com",
       name: "mario",
-      password: "123456",
+      password: bcryptjs.hashSync("123456"),
       role: "admin",
     },
     {
       email: "santiago@gmail.com",
       name: "santiago",
-      password: "123456",
+      password: bcryptjs.hashSync("123456"),
       role: "admin",
     },
     {
       email: "bretta@gmail.com",
       name: "bretta",
-      password: "123456",
+      password: bcryptjs.hashSync("123456"),
       role: "admin",
     },
   ],

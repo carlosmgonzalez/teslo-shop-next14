@@ -2,6 +2,8 @@ import GitHub from "next-auth/providers/github";
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { schemaCredential } from "./libs/zod/credentials";
+import prisma from "@/libs/prisma";
+import bcrypt from "bcryptjs";
 
 export const config = {
 	providers: [
@@ -14,9 +16,19 @@ export const config = {
 
 				const { email, password } = parseCredential.data;
 
-				console.log(email, password);
+				const user = await prisma.user.findUnique({
+					where: {
+						email,
+					},
+				});
 
-				return null;
+				if (!user) return null;
+
+				const validPassword = bcrypt.compareSync(password, user.password);
+
+				if (!validPassword) return null;
+
+				return user;
 			},
 		}),
 	],
