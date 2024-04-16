@@ -28,7 +28,11 @@ export const config = {
 
 				if (!validPassword) return null;
 
-				return user;
+				const { password: _, ...rest } = user;
+
+				console.log({ rest });
+
+				return rest;
 			},
 		}),
 	],

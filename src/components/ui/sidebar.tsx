@@ -17,12 +17,12 @@ import {
 const routes = [
 	{
 		name: "Profile",
-		href: "/",
+		href: "/profile",
 		icon: <IoPersonOutline size={20} />,
 	},
 	{
 		name: "Orders",
-		href: "/",
+		href: "/orders",
 		icon: <IoTicketOutline size={20} />,
 	},
 	{
@@ -32,27 +32,27 @@ const routes = [
 	},
 	{
 		name: "Logout",
-		href: "/",
+		href: "/auth/logout",
 		icon: <IoLogOutOutline size={20} />,
 	},
 	{
 		name: "divider",
-		href: "",
+		href: "/divider",
 		icon: <></>,
 	},
 	{
 		name: "Products",
-		href: "/",
+		href: "/product",
 		icon: <IoShirtOutline size={20} />,
 	},
 	{
 		name: "Orders",
-		href: "/",
+		href: "/allorders",
 		icon: <IoTicketOutline size={20} />,
 	},
 	{
 		name: "Clients",
-		href: "/",
+		href: "/clients",
 		icon: <IoPeopleOutline size={20} />,
 	},
 ];
@@ -99,10 +99,10 @@ export const Sidebar = () => {
 				<div className="w-full mt-10 flex flex-col gap-4">
 					{routes.map((route) =>
 						route.name === "divider" ? (
-							<div key={route.name} className="w-full h-px bg-gray-200 my-5" />
+							<div key={route.href} className="w-full h-px bg-gray-200 my-5" />
 						) : (
 							<Link
-								key={route.name}
+								key={route.href}
 								href={route.href}
 								className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
 							>
