@@ -1,5 +1,6 @@
 "use client";
 
+import { logout } from "@/actions";
 import { cn } from "@/libs/utils";
 import { useSidebar } from "@/store/sidebar.store";
 import Link from "next/link";
@@ -32,7 +33,7 @@ const routes = [
 	},
 	{
 		name: "Logout",
-		href: "/auth/logout",
+		href: "/auth/luogout",
 		icon: <IoLogOutOutline size={20} />,
 	},
 	{
@@ -100,11 +101,21 @@ export const Sidebar = () => {
 					{routes.map((route) =>
 						route.name === "divider" ? (
 							<div key={route.href} className="w-full h-px bg-gray-200 my-5" />
+						) : route.name === "Logout" ? (
+							<button
+								key={route.href}
+								onClick={() => logout()}
+								className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+							>
+								{route.icon}
+								<span className="text-lg">{route.name}</span>
+							</button>
 						) : (
 							<Link
 								key={route.href}
 								href={route.href}
 								className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+								onClick={() => setIsOpen()}
 							>
 								{route.icon}
 								<span className="text-lg">{route.name}</span>
