@@ -3,64 +3,19 @@
 import { logout } from "@/actions";
 import { cn } from "@/libs/utils";
 import { useSidebar } from "@/store/sidebar.store";
+import { routesAdmin, routesAuth, routesUser } from "@/utils";
+import { Role } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-	IoCloseOutline,
-	IoLogInOutline,
-	IoLogOutOutline,
-	IoPeopleOutline,
-	IoPersonOutline,
-	IoSearchOutline,
-	IoShirtOutline,
-	IoTicketOutline,
-} from "react-icons/io5";
-
-const routes = [
-	{
-		name: "Profile",
-		href: "/profile",
-		icon: <IoPersonOutline size={20} />,
-	},
-	{
-		name: "Orders",
-		href: "/orders",
-		icon: <IoTicketOutline size={20} />,
-	},
-	{
-		name: "Login",
-		href: "/auth/login",
-		icon: <IoLogInOutline size={20} />,
-	},
-	{
-		name: "Logout",
-		href: "/auth/luogout",
-		icon: <IoLogOutOutline size={20} />,
-	},
-	{
-		name: "divider",
-		href: "/divider",
-		icon: <></>,
-	},
-	{
-		name: "Products",
-		href: "/product",
-		icon: <IoShirtOutline size={20} />,
-	},
-	{
-		name: "Orders",
-		href: "/allorders",
-		icon: <IoTicketOutline size={20} />,
-	},
-	{
-		name: "Clients",
-		href: "/clients",
-		icon: <IoPeopleOutline size={20} />,
-	},
-];
+import { IoCloseOutline, IoSearchOutline } from "react-icons/io5";
 
 export const Sidebar = () => {
 	const isOpen = useSidebar((state) => state.isOpen);
 	const setIsOpen = useSidebar((state) => state.setIsOpen);
+
+	const { data: session } = useSession();
+	const isAuhtenticated = !!session?.user;
+	const role = session?.user.role;
 
 	return (
 		<div>
@@ -98,29 +53,60 @@ export const Sidebar = () => {
 					</form>
 				</div>
 				<div className="w-full mt-10 flex flex-col gap-4">
-					{routes.map((route) =>
-						route.name === "divider" ? (
-							<div key={route.href} className="w-full h-px bg-gray-200 my-5" />
-						) : route.name === "Logout" ? (
-							<button
-								key={route.href}
-								onClick={() => logout()}
-								className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
-							>
-								{route.icon}
-								<span className="text-lg">{route.name}</span>
-							</button>
-						) : (
-							<Link
-								key={route.href}
-								href={route.href}
-								className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
-								onClick={() => setIsOpen()}
-							>
-								{route.icon}
-								<span className="text-lg">{route.name}</span>
-							</Link>
-						),
+					{routesUser.map(
+						(route) =>
+							role === Role.user &&
+							isAuhtenticated && (
+								<Link
+									key={route.href}
+									href={route.href}
+									className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+									onClick={() => setIsOpen()}
+								>
+									{route.icon}
+									<span className="text-lg">{route.name}</span>
+								</Link>
+							),
+					)}
+					{routesAdmin.map(
+						(route) =>
+							role === Role.admin &&
+							isAuhtenticated && (
+								<Link
+									key={route.href}
+									href={route.href}
+									className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+									onClick={() => setIsOpen()}
+								>
+									{route.icon}
+									<span className="text-lg">{route.name}</span>
+								</Link>
+							),
+					)}
+					{isAuhtenticated && <div className="w-full h-px bg-gray-200 my-5" />}
+					{routesAuth.map((route) =>
+						route.name == "Logout"
+							? isAuhtenticated && (
+									<button
+										key={route.href}
+										onClick={() => logout()}
+										className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+									>
+										{route.icon}
+										<span className="text-lg">{route.name}</span>
+									</button>
+								)
+							: !isAuhtenticated && (
+									<Link
+										key={route.href}
+										href={route.href}
+										className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+										onClick={() => setIsOpen()}
+									>
+										{route.icon}
+										<span className="text-lg">{route.name}</span>
+									</Link>
+								),
 					)}
 				</div>
 			</nav>

@@ -4,3 +4,4 @@ export * from "./products/get-products-by-gender";
 export * from "./products/get-stock-by-slug";
 export * from "./auth/logout";
 export * from "./auth/login";
+export * from "./auth/register";
