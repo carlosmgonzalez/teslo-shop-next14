@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerFormSchema } from "@/libs/zod/register-form";
-import { registerUser } from "@/actions";
+import { login, registerUser } from "@/actions";
 import toast from "react-hot-toast";
 
 export const RegisterForm = () => {
@@ -22,6 +22,8 @@ export const RegisterForm = () => {
 	});
 
 	const onSubmit = async (data: z.infer<typeof registerFormSchema>) => {
+		const { email, password } = data;
+
 		const response = await registerUser(data);
 
 		if (response.ok === false) {
@@ -31,6 +33,9 @@ export const RegisterForm = () => {
 
 		if (response.ok === true) {
 			toast.success(response.message);
+
+			await login({ email, password });
+			window.location.replace("/");
 		}
 	};
 

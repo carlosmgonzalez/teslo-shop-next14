@@ -31,8 +31,6 @@ export const config = {
 
 				const { password: _, ...rest } = user;
 
-				console.log({ rest });
-
 				return rest;
 			},
 		}),
@@ -51,7 +49,6 @@ export const config = {
 			// });
 			// if (!existingUser) return token;
 			// token.role = existingUser?.role;
-
 			if (user) {
 				token.data = user;
 			}

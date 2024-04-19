@@ -10,7 +10,7 @@ export const authenticate = async (
 	try {
 		await signIn("credentials", {
 			...Object.fromEntries(formData),
-			redirectTo: "/profile",
+			redirectTo: "/",
 		});
 	} catch (error) {
 		if (error instanceof AuthError) {
@@ -22,5 +22,31 @@ export const authenticate = async (
 			}
 		}
 		throw error;
+	}
+};
+
+export const login = async ({
+	email,
+	password,
+}: {
+	email: string;
+	password: string;
+}) => {
+	try {
+		await signIn("credentials", {
+			email,
+			password,
+			redirectTo: "/",
+		});
+
+		return {
+			ok: true,
+			message: "Successful registration",
+		};
+	} catch (error) {
+		return {
+			ok: false,
+			message: "Something went wrong",
+		};
 	}
 };
