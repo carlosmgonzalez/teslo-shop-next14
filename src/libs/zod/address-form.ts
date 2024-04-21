@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const addressFormSchema = z.object({
-	firtsName: z.string().min(1),
+	firstName: z.string().min(1),
 	lastName: z.string().min(1),
 	address: z.string().min(1),
 	addressOptional: z.string().optional(),

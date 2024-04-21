@@ -5,18 +5,38 @@ import { addressFormSchema } from "@/libs/zod/address-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useAddress } from "@/store/address.store";
+import { useEffect, useState } from "react";
 
-export const AddressForm = () => {
+interface Props {
+	countries: {
+		name: string;
+		id: string;
+	}[];
+}
+
+export const AddressForm = ({ countries }: Props) => {
+	const setAddress = useAddress((state) => state.setAddress);
+	const data = useAddress((state) => state.data);
+
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isValid },
+		reset,
 	} = useForm<z.infer<typeof addressFormSchema>>({
 		resolver: zodResolver(addressFormSchema),
+		defaultValues: data,
 	});
 
+	const [remember, setRemember] = useState(false);
+
+	useEffect(() => {
+		reset(data);
+	}, [data]);
+
 	const onSubmit = (data: z.infer<typeof addressFormSchema>) => {
-		console.log(data);
+		setAddress(data);
 	};
 
 	return (
@@ -31,12 +51,12 @@ export const AddressForm = () => {
 					<input
 						type="text"
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("firtsName")}
+						{...register("firstName")}
 					/>
 				</div>
 
 				<div className="flex flex-col mb-2">
-					<span>Apellidos</span>
+					<span>Last Name</span>
 					<input
 						type="text"
 						className="p-2 border rounded-md bg-gray-200"
@@ -80,6 +100,8 @@ export const AddressForm = () => {
 					/>
 				</div>
 
+				{/* <SelectCountry register={register} /> */}
+
 				<div className="flex flex-col mb-2">
 					<span>Country</span>
 					<select
@@ -87,7 +109,11 @@ export const AddressForm = () => {
 						{...register("country")}
 					>
 						<option value="">[ Seleccione ]</option>
-						<option value="CRI">Costa Rica</option>
+						{countries.map((country) => (
+							<option key={country.id} value={country.id}>
+								{country.name}
+							</option>
+						))}
 					</select>
 				</div>
 
@@ -111,7 +137,8 @@ export const AddressForm = () => {
 							type="checkbox"
 							className="before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-blue-500 checked:bg-blue-500 checked:before:bg-blue-500 hover:before:opacity-10"
 							id="checkbox"
-							checked
+							onChange={() => setRemember(!remember)}
+							checked={remember}
 						/>
 						<div className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
 							<svg
