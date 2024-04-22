@@ -1,23 +1,37 @@
 "use client";
 
 import { cn } from "@/libs/utils";
-import { addressFormSchema } from "@/libs/zod/address-form";
+import { addressFormSchema } from "@/libs/zod/address-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useAddress } from "@/store/address.store";
 import { useEffect, useState } from "react";
+import { removeUserAddress, setUserAddress } from "@/actions";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
+import type { AddressDB } from "@/interfaces";
+import { useRouter } from "next/navigation";
 
 interface Props {
 	countries: {
 		name: string;
 		id: string;
 	}[];
+	addressDB?: Partial<AddressDB>;
 }
 
-export const AddressForm = ({ countries }: Props) => {
+export const AddressForm = ({ countries, addressDB = {} }: Props) => {
 	const setAddress = useAddress((state) => state.setAddress);
 	const data = useAddress((state) => state.data);
+
+	const { countryId, ...rest } = addressDB;
+
+	const router = useRouter();
+
+	const { data: sessionData } = useSession({
+		required: true,
+	});
 
 	const {
 		register,
@@ -26,17 +40,41 @@ export const AddressForm = ({ countries }: Props) => {
 		reset,
 	} = useForm<z.infer<typeof addressFormSchema>>({
 		resolver: zodResolver(addressFormSchema),
-		defaultValues: data,
+		defaultValues: {
+			...rest,
+			country: countryId,
+		},
 	});
 
-	const [remember, setRemember] = useState(false);
+	const [rememberAddress, setRememberAddress] = useState(false);
 
 	useEffect(() => {
-		reset(data);
+		if (data.address.length > 1) {
+			reset(data);
+		}
 	}, [data]);
 
-	const onSubmit = (data: z.infer<typeof addressFormSchema>) => {
+	const onSubmit = async (data: z.infer<typeof addressFormSchema>) => {
 		setAddress(data);
+
+		const { country, ...rest } = data;
+
+		const addressDB = {
+			...rest,
+			countryId: country,
+		};
+
+		if (rememberAddress && sessionData) {
+			const res = await setUserAddress(addressDB, sessionData?.user.id);
+			if (!res.ok) return toast.error(res.message);
+			toast.success(res.message);
+		} else {
+			const res = await removeUserAddress(sessionData!.user.id);
+			if (!res.ok) return toast.error(res.message);
+			toast.success(res.message);
+		}
+
+		router.push("/checkout");
 	};
 
 	return (
@@ -137,8 +175,8 @@ export const AddressForm = ({ countries }: Props) => {
 							type="checkbox"
 							className="before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-blue-500 checked:bg-blue-500 checked:before:bg-blue-500 hover:before:opacity-10"
 							id="checkbox"
-							onChange={() => setRemember(!remember)}
-							checked={remember}
+							onChange={() => setRememberAddress(!rememberAddress)}
+							checked={rememberAddress}
 						/>
 						<div className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
 							<svg

@@ -1,19 +1,9 @@
+"use server";
+
+import type { AddressDB } from "@/interfaces";
 import prisma from "@/libs/prisma";
-import { addressFormSchema } from "@/libs/zod/address-form";
-import { z } from "zod";
 
-export interface AddressDB {
-	firstName: string;
-	lastName: string;
-	city: string;
-	postalCode: string;
-	phoneNumber: string;
-	address: string;
-	userId: string;
-	countryId: string;
-}
-
-export const setUserAddress = async (userId: string, address: AddressDB) => {
+export const setUserAddress = async (address: AddressDB, userId: string) => {
 	try {
 		const addressExists = await prisma.userAddress.findUnique({
 			where: {
@@ -22,17 +12,32 @@ export const setUserAddress = async (userId: string, address: AddressDB) => {
 		});
 
 		if (addressExists) {
-			await prisma.userAddress.update({
+			const updatedAddress = await prisma.userAddress.update({
 				where: {
 					userId,
 				},
 				data: address,
 			});
+
+			return {
+				ok: true,
+				message: "Address updated succesfully",
+				address: updatedAddress,
+			};
 		}
 
-		await prisma.userAddress.create({
-			data: address,
+		const newAddress = await prisma.userAddress.create({
+			data: {
+				...address,
+				userId,
+			},
 		});
+
+		return {
+			ok: true,
+			message: "Address saved successfully",
+			address: newAddress,
+		};
 	} catch (error) {
 		console.log(error);
 		return {

@@ -1,4 +1,4 @@
-import { addressFormSchema } from "@/libs/zod/address-form";
+import { addressFormSchema } from "@/libs/zod/address-form-schema";
 import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
