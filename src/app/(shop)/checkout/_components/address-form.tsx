@@ -1,10 +1,9 @@
 "use client";
 
 import { cn } from "@/libs/utils";
-import { addressFormSchema } from "@/libs/zod/address-form-schema";
+import { Address, addressFormSchema } from "@/libs/zod/address-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useAddress } from "@/store/address.store";
 import { useEffect, useState } from "react";
 import { removeUserAddress, setUserAddress } from "@/actions";
@@ -38,7 +37,7 @@ export const AddressForm = ({ countries, addressDB = {} }: Props) => {
 		handleSubmit,
 		formState: { errors, isValid },
 		reset,
-	} = useForm<z.infer<typeof addressFormSchema>>({
+	} = useForm<Address>({
 		resolver: zodResolver(addressFormSchema),
 		defaultValues: {
 			...rest,
@@ -54,7 +53,7 @@ export const AddressForm = ({ countries, addressDB = {} }: Props) => {
 		}
 	}, [data]);
 
-	const onSubmit = async (data: z.infer<typeof addressFormSchema>) => {
+	const onSubmit = async (data: Address) => {
 		setAddress(data);
 
 		const { country, ...rest } = data;

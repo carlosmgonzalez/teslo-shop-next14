@@ -10,3 +10,5 @@ export const addressFormSchema = z.object({
 	country: z.string().min(1),
 	phoneNumber: z.string().min(1),
 });
+
+export type Address = z.infer<typeof addressFormSchema>;

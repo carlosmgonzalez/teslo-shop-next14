@@ -1,12 +1,11 @@
 import prisma from "@/libs/prisma";
-import { addressFormSchema } from "@/libs/zod/address-form-schema";
+import { Address } from "@/libs/zod/address-form-schema";
 import { UseFormRegister } from "react-hook-form";
-import { z } from "zod";
 
 export const SelectCountry = async ({
 	register,
 }: {
-	register: UseFormRegister<z.infer<typeof addressFormSchema>>;
+	register: UseFormRegister<Address>;
 }) => {
 	const countries = await prisma.country.findMany({
 		orderBy: {

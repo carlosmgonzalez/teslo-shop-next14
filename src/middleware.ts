@@ -10,7 +10,7 @@ export default auth((req) => {
 	const isCheckoutRoute = nextUrl.pathname.startsWith("/checkout");
 	const isOrdersRoute = nextUrl.pathname.startsWith("/orders");
 
-	if ((!isLoggedIn && isCheckoutRoute) || isOrdersRoute) {
+	if (!isLoggedIn && (isCheckoutRoute || isOrdersRoute)) {
 		return Response.redirect(new URL("/", nextUrl));
 	}
 });

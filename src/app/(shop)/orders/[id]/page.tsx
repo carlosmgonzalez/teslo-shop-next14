@@ -1,102 +1,120 @@
-import { QuantitySelector, Title } from "@/components";
+import { getOrderById } from "@/actions";
+import { auth } from "@/auth";
+import { Title } from "@/components";
 import { cn } from "@/libs/utils";
-import { initialData } from "@/seed/seed";
+import { currencyFormatter } from "@/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 import { IoCartOutline } from "react-icons/io5";
 
-const productsInCart = [
-  initialData.products[0],
-  initialData.products[1],
-  initialData.products[2],
-];
-
 interface Props {
-  params: {
-    id: string;
-  };
+	params: {
+		id: string;
+	};
 }
 
-export default function OrderPage({ params }: Props) {
-  const { id } = params;
+export default async function OrderPage({ params }: Props) {
+	const { id } = params;
 
-  return (
-    <div className="flex justify-center items-center mb-72 px-10 sm:px-0">
-      <div className="flex flex-col w-[1000px]">
-        <Title title={`No. ${id} Order`} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-          <div className="flex flex-col">
-            <div
-              className={cn(
-                "w-full flex items-center rounded-lg py-2 px-3.5 text-sm font-bold text-white mb-5",
-                false && "bg-red-500",
-                true && "bg-green-500"
-              )}
-            >
-              <IoCartOutline size={30} />
-              <span>Pending payment</span>
-            </div>
-            <div className="flex flex-col gap-4">
-              {productsInCart.map((product) => (
-                <div key={product.slug} className="flex">
-                  <Image
-                    src={`/products/${product.images[0]}`}
-                    width={150}
-                    height={100}
-                    alt={product.title}
-                    className="rounded mr-5 aspect-auto"
-                  />
-                  <div>
-                    <p className="font-medium">{product.title}</p>
-                    <p>${product.price} x3</p>
-                    <p className="font-medium">
-                      Subtotal: ${product.price * 3}
-                    </p>
-                    <button className="underline mb-3">Remove</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="w-full">
-            <div className="bg-white bg-ne rounded-xl shadow-xl p-7">
-              <h2 className="text-2xl mb-1">Delivery address</h2>
-              <div>
-                <p>Carlos Gonzalez</p>
-                <p>Av. Rodriguez Peña</p>
-                <p>Buenos Aire - CABA</p>
-                <p>CP: 1020</p>
-              </div>
-              <div className="w-full h-0.5 rounded bg-gray-200 my-6" />
-              <h2 className="text-2xl mb-1">Order summary</h2>
-              <div className="grid grid-cols-2">
-                <span>No. Products</span>
-                <span className="text-right">3</span>
-                <span>Subtotal</span>
-                <span className="text-right">$100</span>
-                <span>Taxes (%15)</span>
-                <span className="text-right">$100</span>
-                <span>Taxes</span>
-                <span className="text-right">$100</span>
-                <span className="mt-5 text-xl font-medium">Total:</span>
-                <span className="text-right mt-5 text-xl">$100</span>
-              </div>
-              <div className="mt-5 w-full">
-                <div
-                  className={cn(
-                    "w-full flex items-center rounded-lg py-2 px-3.5 text-sm font-bold text-white mb-5",
-                    false && "bg-red-500",
-                    true && "bg-green-500"
-                  )}
-                >
-                  <IoCartOutline size={30} />
-                  <span>Pending payment</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	const session = await auth();
+	const user = session!.user;
+
+	const response = await getOrderById(id);
+	if (!response.ok) redirect("/");
+
+	const order = response.order;
+	if (order?.userId !== user.id) redirect("/");
+
+	const address = order.orderAddres;
+	const itemsInOrder = order.orderItem;
+
+	return (
+		<div className="flex justify-center items-center mb-72 px-10 sm:px-0">
+			<div className="flex flex-col w-[1000px]">
+				<Title title={`Order #${id.split("-").at(-1)}`} />
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+					<div className="flex flex-col">
+						<div
+							className={cn(
+								"w-full flex items-center gap-4 rounded-lg py-2 px-3.5 text-sm font-bold text-white mb-5",
+								order.isPaid ? "bg-green-500" : "bg-red-500",
+							)}
+						>
+							<IoCartOutline size={30} />
+							<span>{order.isPaid ? "Paid" : "Unpaid"}</span>
+						</div>
+						<div className="flex flex-col gap-4">
+							{itemsInOrder.map((item) => (
+								<div key={item.id} className="flex">
+									<Image
+										src={`/products/${item.product.productImage.map((p) => p.url)}`}
+										width={150}
+										height={100}
+										alt={item.product.title}
+										className="rounded mr-5 aspect-auto"
+									/>
+									<div>
+										<p className="font-semibold">{item.product.title}</p>
+										<p className="font-medium">Size: {item.size}</p>
+										<p className="font-medium">
+											{item.quantity} x ${item.price}
+										</p>
+										<p className="font-medium">
+											Subtotal: {currencyFormatter(item.price * item.quantity)}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+					<div className="w-full">
+						<div className="bg-white bg-ne rounded-xl shadow-xl p-7">
+							<h2 className="text-2xl mb-1">Delivery address</h2>
+							<div>
+								<p>
+									{address?.lastName}, {address?.firstName}
+								</p>
+								<p>{address?.address}</p>
+								<p>
+									{address?.city}, {address?.countryId}
+								</p>
+								<p>CP: {address?.postalCode}</p>
+							</div>
+							<div className="w-full h-0.5 rounded bg-gray-200 my-6" />
+							<h2 className="text-2xl mb-1">Order summary</h2>
+							<div className="grid grid-cols-2">
+								<span>No. Products</span>
+								<span className="text-right">{order?.itemsInOrder}</span>
+								<span>Subtotal</span>
+								<span className="text-right">
+									{currencyFormatter(order!.subTotal)}
+								</span>
+								<span>Taxes (%15)</span>
+								<span className="text-right">
+									{currencyFormatter(order!.tax)}
+								</span>
+								<span className="mt-5 text-xl font-medium">Total:</span>
+								<span className="text-right mt-5 text-xl">
+									{currencyFormatter(order!.total)}
+								</span>
+							</div>
+							<div className="mt-5 w-full">
+								<div
+									className={cn(
+										"w-full flex items-center rounded-lg py-2 px-3.5 text-sm font-bold text-white mb-5",
+										order.isPaid ? "bg-green-500" : "bg-red-500",
+									)}
+								>
+									<IoCartOutline size={30} />
+									<span>
+										{order.isPaid ? "Order is paid" : "Pending payment"}
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }
