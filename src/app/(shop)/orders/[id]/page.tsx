@@ -1,6 +1,6 @@
 import { getOrderById } from "@/actions";
 import { auth } from "@/auth";
-import { Title } from "@/components";
+import { PayPalButton, Title } from "@/components";
 import { cn } from "@/libs/utils";
 import { currencyFormatter } from "@/utils";
 import Image from "next/image";
@@ -99,17 +99,7 @@ export default async function OrderPage({ params }: Props) {
 								</span>
 							</div>
 							<div className="mt-5 w-full">
-								<div
-									className={cn(
-										"w-full flex items-center rounded-lg py-2 px-3.5 text-sm font-bold text-white mb-5",
-										order.isPaid ? "bg-green-500" : "bg-red-500",
-									)}
-								>
-									<IoCartOutline size={30} />
-									<span>
-										{order.isPaid ? "Order is paid" : "Pending payment"}
-									</span>
-								</div>
+								<PayPalButton amount={order!.total} orderId={order.id} />
 							</div>
 						</div>
 					</div>
