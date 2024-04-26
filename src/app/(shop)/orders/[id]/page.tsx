@@ -1,11 +1,10 @@
 import { getOrderById } from "@/actions";
 import { auth } from "@/auth";
 import { PayPalButton, Title } from "@/components";
-import { cn } from "@/libs/utils";
 import { currencyFormatter } from "@/utils";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { IoCartOutline } from "react-icons/io5";
+import { OrderStatus } from "../_components/order-status";
 
 interface Props {
 	params: {
@@ -22,8 +21,9 @@ export default async function OrderPage({ params }: Props) {
 	const response = await getOrderById(id);
 	if (!response.ok) redirect("/");
 
-	const order = response.order;
-	if (order?.userId !== user.id) redirect("/");
+	const order = response.order!;
+
+	if (user.role != "admin" && order?.userId !== user.id) redirect("/");
 
 	const address = order.orderAddres;
 	const itemsInOrder = order.orderItem;
@@ -34,15 +34,7 @@ export default async function OrderPage({ params }: Props) {
 				<Title title={`Order #${id.split("-").at(-1)}`} />
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
 					<div className="flex flex-col">
-						<div
-							className={cn(
-								"w-full flex items-center gap-4 rounded-lg py-2 px-3.5 text-sm font-bold text-white mb-5",
-								order.isPaid ? "bg-green-500" : "bg-red-500",
-							)}
-						>
-							<IoCartOutline size={30} />
-							<span>{order.isPaid ? "Paid" : "Unpaid"}</span>
-						</div>
+						<OrderStatus isPaid={order.isPaid} />
 						<div className="flex flex-col gap-4">
 							{itemsInOrder.map((item) => (
 								<div key={item.id} className="flex">
@@ -99,7 +91,11 @@ export default async function OrderPage({ params }: Props) {
 								</span>
 							</div>
 							<div className="mt-5 w-full">
-								<PayPalButton amount={order!.total} orderId={order.id} />
+								{order.isPaid ? (
+									<OrderStatus isPaid={order.isPaid} />
+								) : (
+									<PayPalButton amount={order!.total} orderId={order.id} />
+								)}
 							</div>
 						</div>
 					</div>

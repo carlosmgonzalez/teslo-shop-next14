@@ -1,17 +1,28 @@
 // https://tailwindcomponents.com/component/hoverable-table
-import { getOrdersByUser } from "@/actions";
-import { Title } from "@/components";
+import { getAllOrders } from "@/actions";
+import { Pagination, Title } from "@/components";
 import { cn } from "@/libs/utils";
-
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IoCardOutline } from "react-icons/io5";
 
-export default async function OrdersPage() {
-	const response = await getOrdersByUser();
+interface Props {
+	searchParams: {
+		page: string;
+	};
+}
+
+export default async function OrdersAdminPage({ searchParams }: Props) {
+	const page = searchParams.page ? +searchParams.page : 1;
+
+	if (isNaN(page)) redirect("/admin/orders");
+	if (page <= 0) redirect("/admin/orders");
+
+	const response = await getAllOrders({ page });
 	if (!response.ok) redirect("/");
 
 	const orders = response.orders;
+	const totalPages = response.totalPages!;
 
 	return (
 		<>
@@ -87,6 +98,8 @@ export default async function OrdersPage() {
 					</tbody>
 				</table>
 			</div>
+
+			<Pagination totalPages={totalPages} />
 		</>
 	);
 }

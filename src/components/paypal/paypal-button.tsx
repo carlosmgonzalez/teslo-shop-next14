@@ -42,6 +42,7 @@ export const PayPalButton = ({ orderId, amount }: Props) => {
 			intent: "CAPTURE",
 			purchase_units: [
 				{
+					invoice_id: orderId,
 					amount: {
 						value: rountedAmount.toString(),
 						currency_code: "USD",
@@ -68,10 +69,21 @@ export const PayPalButton = ({ orderId, amount }: Props) => {
 		const details = await actions.order?.capture();
 		if (!details) return;
 
-		const res = await paypalCheckPayment(details.id!, orderId);
+		const res = await paypalCheckPayment(details.id!);
 
-		console.log(res);
+		if (!res.ok) {
+			toast.error(res.message || "");
+			return;
+		}
+
+		toast.success(res.message || "");
 	};
 
-	return <PayPalButtons createOrder={createOrder} onApprove={onApprove} />;
+	return (
+		<PayPalButtons
+			className="relative z-0"
+			createOrder={createOrder}
+			onApprove={onApprove}
+		/>
+	);
 };

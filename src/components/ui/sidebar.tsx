@@ -53,10 +53,21 @@ export const Sidebar = () => {
 					</form>
 				</div>
 				<div className="w-full mt-10 flex flex-col gap-4">
-					{routesUser.map(
-						(route) =>
-							role === Role.user &&
-							isAuhtenticated && (
+					{role === Role.user &&
+						routesUser.map((route) => (
+							<Link
+								key={route.href}
+								href={route.href}
+								className="flex items-center gap-2 hover:bg-gray-100 rounded transition-all px-2 py-1.5"
+								onClick={() => setIsOpen()}
+							>
+								{route.icon}
+								<span className="text-lg">{route.name}</span>
+							</Link>
+						))}
+					{role === Role.admin && (
+						<>
+							{routesUser.map((route) => (
 								<Link
 									key={route.href}
 									href={route.href}
@@ -66,12 +77,9 @@ export const Sidebar = () => {
 									{route.icon}
 									<span className="text-lg">{route.name}</span>
 								</Link>
-							),
-					)}
-					{routesAdmin.map(
-						(route) =>
-							role === Role.admin &&
-							isAuhtenticated && (
+							))}
+							<div className="w-full h-px bg-gray-200 my-5" />
+							{routesAdmin.map((route) => (
 								<Link
 									key={route.href}
 									href={route.href}
@@ -81,7 +89,8 @@ export const Sidebar = () => {
 									{route.icon}
 									<span className="text-lg">{route.name}</span>
 								</Link>
-							),
+							))}
+						</>
 					)}
 					{isAuhtenticated && <div className="w-full h-px bg-gray-200 my-5" />}
 					{routesAuth.map((route) =>

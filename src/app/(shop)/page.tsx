@@ -5,32 +5,29 @@ import { Pagination, ProductGrid, Title } from "@/components";
 import { redirect } from "next/navigation";
 
 interface Props {
-  searchParams: {
-    page: number;
-  };
+	searchParams: {
+		page: number;
+	};
 }
 
 export default async function Home({ searchParams }: Props) {
-  const page = searchParams.page ? +searchParams.page : 1;
+	const page = searchParams.page ? +searchParams.page : 1;
 
-  if (isNaN(+page)) redirect("/");
+	if (isNaN(+page)) redirect("/");
+	if (page <= 0) redirect("/");
 
-  if (page <= 0) redirect("/");
+	const res = await getAllProducts({ page });
 
-  const res = await getAllProducts({ page });
-  const { error, success } = res;
+	if (!res.ok) return <h2>{res.message}</h2>;
 
-  if (error) return <p>Products not found, look your database</p>;
-  if (!success) return <p>Something went wrong</p>;
+	const products = res.products!;
+	const totalPages = res.totalPages!;
 
-  const { products, totalPages, currentPage } = success;
-  if (products.length === 0) redirect("/");
-
-  return (
-    <>
-      <Title title="Shop" subtitle="All products" className="mb-2" />
-      <ProductGrid products={products} />
-      <Pagination totalPages={totalPages} />
-    </>
-  );
+	return (
+		<>
+			<Title title="Shop" subtitle="All products" className="mb-2" />
+			<ProductGrid products={products} />
+			<Pagination totalPages={totalPages} />
+		</>
+	);
 }

@@ -23,17 +23,17 @@ export const routesUser = [
 export const routesAdmin = [
 	{
 		name: "Products",
-		href: "/product",
+		href: "/admin/products",
 		icon: <IoShirtOutline size={20} />,
 	},
 	{
 		name: "Orders",
-		href: "/allorders",
+		href: "/admin/orders",
 		icon: <IoTicketOutline size={20} />,
 	},
 	{
 		name: "Clients",
-		href: "/clients",
+		href: "/admin/clients",
 		icon: <IoPeopleOutline size={20} />,
 	},
 ];
