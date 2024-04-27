@@ -1,7 +1,6 @@
 import { getProductBySlug } from "@/actions";
 import { Title } from "@/components";
 import { redirect } from "next/navigation";
-import toast from "react-hot-toast";
 import { ProductForm } from "../_components/product-form";
 import { getCatories } from "@/actions/categories/get-categories";
 
@@ -19,20 +18,17 @@ export default async function ProductAdminPage({ params }: Props) {
 		getCatories(),
 	]);
 
-	if (!resProducts.ok || !resCategories.ok) {
-		toast.error(resProducts.message!);
-		redirect("/admin/products");
-	}
+	const product = resProducts.product; // Product & {images: string[], productImage: ProductImage[]}
+	if (!product && slug !== "new") redirect("/admin/products");
 
-	const product = resProducts.product!;
-	const title = slug ? "Edit product" : "New Product";
+	const title = slug !== "new" ? "Edit product" : "New Product";
 
 	const categories = resCategories.categoies!;
 
 	return (
 		<div>
 			<Title title={title} />
-			<ProductForm product={product} categories={categories} />
+			<ProductForm product={product ?? {}} categories={categories} />
 		</div>
 	);
 }

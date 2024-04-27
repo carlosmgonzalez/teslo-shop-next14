@@ -1,42 +1,21 @@
 "use client";
 
-import { updateProductById } from "@/actions/products/update-product-by-id";
+import { createUpdateProduct } from "@/actions";
 import { cn } from "@/libs/utils";
-// import { Product } from "@/interfaces";
-import { Category, Size } from "@prisma/client";
+import { productFormSchema } from "@/libs/zod/product-form-schema";
+import { Category, Product, ProductImage, Size } from "@prisma/client";
+import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { z } from "zod";
-
-interface Product {
-	id: string;
-	description: string;
-	images: string[];
-	inStock: number;
-	price: number;
-	sizes: Size[];
-	slug: string;
-	tags: string[];
-	title: string;
-	gender: Category;
-	productImages: { url: string }[];
-}
 
 interface Props {
-	product: Product;
+	product: Partial<Product> & {
+		images?: string[];
+		productImage?: ProductImage[];
+	};
 	categories: Category[];
 }
-
-// const productFormSchema = z.object({
-// 	  title: z.string(),
-// 	  slug: z.string(),
-// 	  description: z.string(),
-// 	  price: z.number(),
-// 	  tags: z.array(z.string()),
-// 	  gender: z.
-// 	})
-//
 
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"] as Size[];
 
@@ -45,24 +24,42 @@ export const ProductForm = ({ product, categories }: Props) => {
 		register,
 		handleSubmit,
 		formState: { errors, isValid },
-		setValue,
 		getValues,
-	} = useForm<Product>({
+		setValue,
+		watch,
+	} = useForm<Product & { images: string[]; productImages?: ProductImage[] }>({
 		defaultValues: {
 			...product,
 		},
 	});
 
-	const [sizes_, setSizes_] = useState(product.sizes);
+	const [sizes_, setSizes_] = useState(product.sizes || []);
 
-	const onSubmit = async (data: Product) => {
-		const { sizes, id, price, productImages, images, ...rest } = data;
+	// Este es otra forma de cambiar los sizes sin tenes que crear un useState aparte
+	const onSizeChanged = (size: Size) => {
+		const sizes = new Set(getValues("sizes"));
+		sizes.has(size) ? sizes.delete(size) : sizes.add(size);
+		setValue("sizes", Array.from(sizes));
+	};
 
-		console.log(product);
+	// Y esto es para que se ven los cambios cuando se hace un setValue()
+	watch("sizes");
 
-		const newData = { ...rest, price: +price, sizes: sizes_ };
+	const onSubmit = async (
+		data: Product & { images?: string[]; productImages?: ProductImage[] },
+	) => {
+		const { id, sizes, price, ...rest } = data;
+		const newData = {
+			id: id ? id : "",
+			price: +price,
+			sizes: sizes_,
+			...rest,
+		};
 
-		const res = await updateProductById(product.id, newData);
+		const res = await createUpdateProduct(product.id || "", {
+			...newData,
+			sizes: newData.sizes || [],
+		});
 
 		if (!res.ok) {
 			toast.error(res.message);
@@ -70,6 +67,16 @@ export const ProductForm = ({ product, categories }: Props) => {
 		}
 
 		toast.success(res.message);
+	};
+
+	const onSubmit_ = async (data: Product & { images: string[] }) => {
+		const formData = new FormData();
+		if (product.id) formData.append("id", product.id);
+		formData.append("title", data.title);
+		formData.append("price", data.price.toString());
+		formData.append("sizes", data.sizes.toString());
+		const data_ = Object.fromEntries(formData); // Esto para parar de tipo FormData a un objeto de js.
+		const productParsed = productFormSchema.safeParse(data_);
 	};
 
 	return (
@@ -84,7 +91,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<input
 						type="text"
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("title")}
+						{...register("title", { required: true })}
 					/>
 				</div>
 
@@ -93,7 +100,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<input
 						type="text"
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("slug")}
+						{...register("slug", { required: true })}
 					/>
 				</div>
 
@@ -102,7 +109,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<textarea
 						rows={5}
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("description")}
+						{...register("description", { required: true })}
 					></textarea>
 				</div>
 
@@ -111,7 +118,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<input
 						type="number"
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("price")}
+						{...register("price", { required: true, min: 0 })}
 					/>
 				</div>
 
@@ -120,7 +127,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<input
 						type="text"
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("tags")}
+						{...register("tags", { required: true })}
 					/>
 				</div>
 
@@ -128,7 +135,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<span>Gender</span>
 					<select
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("gender")}
+						{...register("gender", { required: true })}
 					>
 						<option value="">[Seleccione]</option>
 						<option value="men">Men</option>
@@ -142,7 +149,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 					<span>Categoria</span>
 					<select
 						className="p-2 border rounded-md bg-gray-200"
-						{...register("categoryId")}
+						{...register("categoryId", { required: true })}
 					>
 						<option value="">[Select]</option>
 						{categories.map((category) => (
@@ -153,13 +160,26 @@ export const ProductForm = ({ product, categories }: Props) => {
 					</select>
 				</div>
 
-				<button type="submit" className="btn-primary w-full">
+				<button
+					type="submit"
+					className={cn("btn-primary w-full", !isValid && "opacity-50")}
+					disabled={!isValid}
+				>
 					Save
 				</button>
 			</div>
 
 			{/* Selector de tallas y fotos */}
 			<div className="w-full">
+				<div className="flex flex-col mb-2">
+					<span>In Stock</span>
+					<input
+						type="number"
+						className="p-2 border rounded-md bg-gray-200"
+						{...register("inStock", { required: true, min: 0 })}
+					/>
+				</div>
+
 				{/* As checkboxes */}
 				<div className="flex flex-col">
 					<span>Tallas</span>
@@ -198,6 +218,26 @@ export const ProductForm = ({ product, categories }: Props) => {
 							className="p-2 border rounded-md bg-gray-200"
 							accept="image/png, image/jpeg"
 						/>
+					</div>
+					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+						{product.productImage &&
+							product.productImage.map((image) => (
+								<div key={image.id} className="w-full">
+									<Image
+										src={`/products/${image.url}`}
+										alt={image.url}
+										width={200}
+										height={200}
+										className="rounded-t shadow-md w-full"
+									/>
+									<button
+										className="px-2 py-1.5 bg-red-500 hover:bg-red-700 rounded-b w-full text-white font-medium"
+										type="button"
+									>
+										Delete
+									</button>
+								</div>
+							))}
 					</div>
 				</div>
 			</div>

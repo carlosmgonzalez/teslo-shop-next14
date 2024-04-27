@@ -108,14 +108,8 @@ export default async function ProductsAdminPage({ searchParams }: Props) {
 							</td>
 							<td className="text-sm text-gray-900 font-light px-6 py-4">
 								{product.sizes.map((size) => (
-									<span>{size + " "}</span>
+									<span key={size}>{size + " "}</span>
 								))}
-								{/* <Link */}
-								{/* 	href={"/admin/products" + product.id} */}
-								{/* 	className="hover:underline" */}
-								{/* > */}
-								{/* 	Edit */}
-								{/* </Link> */}
 							</td>
 						</tr>
 					))}
