@@ -26,7 +26,7 @@ export const ProductForm = ({ product, categories }: Props) => {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors, isValid },
+		formState: { isValid },
 		getValues,
 		setValue,
 		watch,
@@ -87,7 +87,8 @@ export const ProductForm = ({ product, categories }: Props) => {
 		}
 
 		toast.success(res.message);
-		router.replace(`/admin/products/${res.product!.slug}`);
+		router.replace(`/admin/products`);
+		router.refresh();
 	};
 
 	// const onSubmit_ = async (data: Product & { images: string[] }) => {

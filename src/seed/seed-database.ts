@@ -5,13 +5,19 @@ import { countries } from "./seed-countries";
 
 async function main() {
 	// Delete previous records
-	await Promise.all([
-		prisma?.user.deleteMany(),
-		prisma?.country.deleteMany(),
-		prisma?.productImage.deleteMany(),
-		prisma?.product.deleteMany(),
-		prisma?.category.deleteMany(),
-	]);
+	// await Promise.all([
+	// ]);
+	await prisma.orderAddres.deleteMany();
+	await prisma.orderItem.deleteMany();
+	await prisma.order.deleteMany();
+
+	await prisma.userAddress.deleteMany();
+	await prisma.user.deleteMany();
+	await prisma.country.deleteMany();
+
+	await prisma.productImage.deleteMany();
+	await prisma.product.deleteMany();
+	await prisma.category.deleteMany();
 
 	const { categories, products, users } = initialData;
 
@@ -34,13 +40,10 @@ async function main() {
 
 	const categoriesDB = await prisma.category.findMany();
 
-	const categoriesMap = categoriesDB.reduce(
-		(map, category) => {
-			map[category.name.toLowerCase()] = category.id;
-			return map;
-		},
-		{} as Record<string, string>,
-	);
+	const categoriesMap = categoriesDB.reduce((map, category) => {
+		map[category.name.toLowerCase()] = category.id;
+		return map;
+	}, {} as Record<string, string>);
 
 	// Here we adapt the product information to the database schema,
 	// We necessarily had to await each product in order to take its id and then

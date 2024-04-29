@@ -51,7 +51,7 @@ export const AddressForm = ({ countries, addressDB = {} }: Props) => {
 		if (data.address.length > 1) {
 			reset(data);
 		}
-	}, [data]);
+	}, [reset, data]);
 
 	const onSubmit = async (data: Address) => {
 		setAddress(data);
