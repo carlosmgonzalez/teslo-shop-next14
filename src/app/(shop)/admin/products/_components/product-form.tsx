@@ -1,10 +1,11 @@
 "use client";
 
-import { createUpdateProduct } from "@/actions";
+import { createUpdateProduct, deleteProductImage } from "@/actions";
+import { ProductImage as ProductImageComponent } from "@/components";
 import { cn } from "@/libs/utils";
 import { productFormSchema } from "@/libs/zod/product-form-schema";
 import { Category, Product, ProductImage, Size } from "@prisma/client";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -20,6 +21,8 @@ interface Props {
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"] as Size[];
 
 export const ProductForm = ({ product, categories }: Props) => {
+	const router = useRouter();
+
 	const {
 		register,
 		handleSubmit,
@@ -27,9 +30,10 @@ export const ProductForm = ({ product, categories }: Props) => {
 		getValues,
 		setValue,
 		watch,
-	} = useForm<Product & { images: string[]; productImages?: ProductImage[] }>({
+	} = useForm<Product & { images?: FileList; productImages?: ProductImage[] }>({
 		defaultValues: {
 			...product,
+			images: undefined,
 		},
 	});
 
@@ -46,19 +50,35 @@ export const ProductForm = ({ product, categories }: Props) => {
 	watch("sizes");
 
 	const onSubmit = async (
-		data: Product & { images?: string[]; productImages?: ProductImage[] },
+		data: Product & { images?: FileList; productImages?: ProductImage[] },
 	) => {
-		const { id, sizes, price, ...rest } = data;
-		const newData = {
+		const { id, sizes, price, inStock, images, ...rest } = data;
+
+		if (typeof rest.tags === "string") {
+			// @ts-ignore
+			rest.tags = rest.tags.split(",").map((a) => a.trim());
+		}
+
+		const formDataImages = new FormData();
+
+		if (images) {
+			for (let i = 0; i < images?.length; i++) {
+				formDataImages.append("images", images[i]);
+			}
+		}
+
+		const data_ = {
 			id: id ? id : "",
 			price: +price,
 			sizes: sizes_,
+			inStock: +inStock,
+			images: formDataImages,
 			...rest,
 		};
 
 		const res = await createUpdateProduct(product.id || "", {
-			...newData,
-			sizes: newData.sizes || [],
+			...data_,
+			sizes: data_.sizes || [],
 		});
 
 		if (!res.ok) {
@@ -67,17 +87,18 @@ export const ProductForm = ({ product, categories }: Props) => {
 		}
 
 		toast.success(res.message);
+		router.replace(`/admin/products/${res.product!.slug}`);
 	};
 
-	const onSubmit_ = async (data: Product & { images: string[] }) => {
-		const formData = new FormData();
-		if (product.id) formData.append("id", product.id);
-		formData.append("title", data.title);
-		formData.append("price", data.price.toString());
-		formData.append("sizes", data.sizes.toString());
-		const data_ = Object.fromEntries(formData); // Esto para parar de tipo FormData a un objeto de js.
-		const productParsed = productFormSchema.safeParse(data_);
-	};
+	// const onSubmit_ = async (data: Product & { images: string[] }) => {
+	// 	const formData = new FormData();
+	// 	if (product.id) formData.append("id", product.id);
+	// 	formData.append("title", data.title);
+	// 	formData.append("price", data.price.toString());
+	// 	formData.append("sizes", data.sizes.toString());
+	// 	const data_ = Object.fromEntries(formData); // Esto para parar de tipo FormData a un objeto de js.
+	// 	const productParsed = productFormSchema.safeParse(data_);
+	// };
 
 	return (
 		<form
@@ -216,21 +237,28 @@ export const ProductForm = ({ product, categories }: Props) => {
 							type="file"
 							multiple
 							className="p-2 border rounded-md bg-gray-200"
-							accept="image/png, image/jpeg"
+							accept="image/png, image/jpeg, image/avif"
+							{...register("images")}
 						/>
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						{product.productImage &&
 							product.productImage.map((image) => (
 								<div key={image.id} className="w-full">
-									<Image
-										src={`/products/${image.url}`}
+									<ProductImageComponent
+										src={image.url}
 										alt={image.url}
+										className="rounded-t shadow-md w-full"
 										width={200}
 										height={200}
-										className="rounded-t shadow-md w-full"
 									/>
 									<button
+										onClick={async () => {
+											const response = await deleteProductImage(
+												image.id,
+												image.url,
+											);
+										}}
 										className="px-2 py-1.5 bg-red-500 hover:bg-red-700 rounded-b w-full text-white font-medium"
 										type="button"
 									>

@@ -21,10 +21,10 @@ export const getOrderById = async (orderId: string) => {
 								slug: true,
 								price: true,
 								productImage: {
+									take: 1,
 									select: {
 										url: true,
 									},
-									take: 1,
 								},
 							},
 						},
@@ -43,7 +43,7 @@ export const getOrderById = async (orderId: string) => {
 
 		return {
 			ok: true,
-			order,
+			order: order,
 		};
 	} catch (error) {
 		console.log(error);

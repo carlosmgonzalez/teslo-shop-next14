@@ -1,6 +1,6 @@
 import { getOrderById } from "@/actions";
 import { auth } from "@/auth";
-import { PayPalButton, Title } from "@/components";
+import { PayPalButton, ProductImage, Title } from "@/components";
 import { currencyFormatter } from "@/utils";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -38,8 +38,8 @@ export default async function OrderPage({ params }: Props) {
 						<div className="flex flex-col gap-4">
 							{itemsInOrder.map((item) => (
 								<div key={item.id} className="flex">
-									<Image
-										src={`/products/${item.product.productImage.map((p) => p.url)}`}
+									<ProductImage
+										src={`${item.product.productImage.forEach((a) => a.url)}`}
 										width={150}
 										height={100}
 										alt={item.product.title}

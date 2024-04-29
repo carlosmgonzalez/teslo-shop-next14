@@ -1,7 +1,6 @@
 import { getAllProducts } from "@/actions";
-import { Pagination, Title } from "@/components";
+import { Pagination, ProductImage, Title } from "@/components";
 import { currencyFormatter } from "@/utils";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -84,13 +83,15 @@ export default async function ProductsAdminPage({ searchParams }: Props) {
 							className="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100"
 						>
 							<td className="">
-								<Image
-									src={`/products/${product.images[0]}`}
-									alt={product.title}
-									className="ml-4"
-									width={50}
-									height={50}
-								/>
+								<Link href={`/product/${product.slug}`}>
+									<ProductImage
+										src={product.images[0]}
+										alt={product.title}
+										className="ml-4"
+										width={50}
+										height={50}
+									/>
+								</Link>
 							</td>
 							<td className="text-sm text-gray-900 font-light px-6 py-4">
 								<Link href={`/admin/products/${product.slug}`}>

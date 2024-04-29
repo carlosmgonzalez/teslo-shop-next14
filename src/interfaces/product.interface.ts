@@ -11,6 +11,18 @@ export interface Product {
 	gender: Gender;
 }
 
+export interface ProductDB {
+	id: string;
+	description: string;
+	inStock: number;
+	price: number;
+	sizes: Size[];
+	slug: string;
+	tags: string[] | string;
+	title: string;
+	gender: Gender;
+}
+
 export interface ProductSeed {
 	description: string;
 	images: string[];
